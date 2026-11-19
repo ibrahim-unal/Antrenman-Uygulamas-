@@ -2,7 +2,11 @@ name: APK oluştur
 
 on:
   push:
+    branches: [main]
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -19,8 +23,18 @@ jobs:
         run: |
           chmod +x gradlew
           ./gradlew assembleRelease --no-daemon
+          cp app/build/outputs/apk/release/app-release.apk Antrenmanim.apk
 
       - uses: actions/upload-artifact@v4
         with:
           name: Antrenmanim-apk
-          path: app/build/outputs/apk/release/*.apk
+          path: Antrenmanim.apk
+
+      - name: Releases sayfasına koy
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.${{ github.run_number }}
+          name: Antrenmanım v1.0.${{ github.run_number }}
+          body: Telefonuna indirip kur. (Bilinmeyen kaynaklardan yükleme izni isteyebilir.)
+          files: Antrenmanim.apk
+          make_latest: true
