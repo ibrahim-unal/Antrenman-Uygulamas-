@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#111418">
+<title>Antrenmanım</title>
+<style>
+  :root{
+    --bg:#111418; --card:#1b2027; --card2:#232a33; --line:#2e3640;
+    --text:#f2f4f7; --muted:#9aa4b2; --accent:#c6f432; --accent-ink:#151a05;
+    --danger:#ff5a5f; --edit:#ffb020;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--text);
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:17px}
+  body{overscroll-behavior:none}
+  button{font:inherit;color:inherit;border:0;cursor:pointer}
+  input{font:inherit}
+  .screen{min-height:100%;display:flex;flex-direction:column;padding:16px 16px 28px}
+  header{display:flex;align-items:center;gap:10px;margin-bottom:16px;min-height:48px}
+  header h1{font-size:21px;margin:0;flex:1;line-height:1.2;word-break:break-word}
+  .back{width:44px;height:44px;border-radius:12px;background:var(--card);font-size:22px;flex:none}
+  .editBtn{padding:10px 14px;border-radius:12px;background:var(--card);font-weight:600;flex:none}
+  .editBtn.on{background:var(--edit);color:#221600}
+  .editNote{background:rgba(255,176,32,.12);border:1px solid rgba(255,176,32,.4);color:var(--edit);
+    border-radius:12px;padding:10px 12px;font-size:14px;margin-bottom:12px}
+  .list{display:flex;flex-direction:column;gap:10px}
+  .item{background:var(--card);border-radius:16px;padding:14px;display:flex;align-items:center;gap:12px;
+    text-align:left;width:100%;border:1px solid transparent}
+  .item.tap:active{background:var(--card2)}
+  .badge{background:var(--accent);color:var(--accent-ink);font-weight:800;border-radius:10px;
+    padding:8px 10px;font-size:15px;flex:none;min-width:64px;text-align:center}
+  .grow{flex:1;min-width:0}
+  .title{font-size:19px;font-weight:700;overflow-wrap:break-word}
+  .sub{color:var(--muted);font-size:14px;margin-top:3px}
+  .num{color:var(--accent);font-size:13px;font-weight:700;letter-spacing:.3px;text-transform:uppercase}
+  .thumb{width:64px;height:64px;border-radius:12px;background:var(--card2);flex:none;object-fit:cover;
+    display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:24px;overflow:hidden}
+  .thumb img{width:100%;height:100%;object-fit:contain;background:#fff}
+  .tools{display:flex;gap:6px;flex:none}
+  .tool{width:40px;height:40px;border-radius:10px;background:var(--card2);font-size:17px}
+  .tool.del{background:rgba(255,90,95,.15);color:var(--danger)}
+  .tool:disabled{opacity:.3}
+  .add{margin-top:12px;width:100%;padding:16px;border-radius:16px;border:2px dashed var(--edit);
+    background:transparent;color:var(--edit);font-weight:700;font-size:17px}
+  .empty{color:var(--muted);text-align:center;padding:40px 16px;line-height:1.5}
+  .big{width:100%;padding:18px;border-radius:16px;background:var(--accent);color:var(--accent-ink);
+    font-weight:800;font-size:20px;margin-top:auto}
+  .big:disabled{opacity:.35}
+  .spacer{flex:1;min-height:20px}
+  /* form */
+  label{display:block;color:var(--muted);font-size:14px;margin:14px 0 6px}
+  .field{width:100%;padding:14px;border-radius:12px;background:var(--card);border:1px solid var(--line);
+    color:var(--text);font-size:18px;outline:none}
+  .field:focus{border-color:var(--accent)}
+  .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+  .gifbox{background:var(--card);border-radius:16px;min-height:180px;display:flex;align-items:center;
+    justify-content:center;overflow:hidden;color:var(--muted);border:1px solid var(--line)}
+  .gifbox img{width:100%;max-height:300px;object-fit:contain;display:block}
+  .btnrow{display:flex;gap:10px;margin-top:10px}
+  .sec{flex:1;padding:14px;border-radius:12px;background:var(--card2);font-weight:600}
+  .sec.red{color:var(--danger)}
+  .formBtns{display:flex;gap:10px;margin-top:24px}
+  .formBtns .sec,.formBtns .big{margin:0}
+  /* run */
+  .run{height:100%;min-height:100%;padding-bottom:16px}
+  .runTop{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+  .progress{flex:1;height:8px;background:var(--card);border-radius:8px;overflow:hidden}
+  .progress i{display:block;height:100%;background:var(--accent);border-radius:8px}
+  .count{font-weight:700;color:var(--muted);flex:none}
+  .runName{font-size:28px;font-weight:800;margin:8px 0 2px;text-align:center;word-break:break-word}
+  .runNum{text-align:center;color:var(--accent);font-weight:700;font-size:14px;text-transform:uppercase}
+  .runGif{flex:1;min-height:200px;background:var(--card);border-radius:20px;margin:12px 0;overflow:hidden;
+    display:flex;align-items:center;justify-content:center;color:var(--muted)}
+  .runGif img{width:100%;height:100%;object-fit:contain;background:#fff}
+  .stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+  .stat{background:var(--card);border-radius:16px;padding:12px 6px;text-align:center}
+  .stat b{display:block;font-size:30px;line-height:1.1;word-break:break-word}
+  .stat span{color:var(--muted);font-size:13px;font-weight:600;letter-spacing:.5px}
+  .sets{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin:14px 0 4px}
+  .dot{width:46px;height:46px;border-radius:50%;background:var(--card);border:2px solid var(--line);
+    font-weight:800;color:var(--muted)}
+  .dot.done{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+  .hint{text-align:center;color:var(--muted);font-size:13px;margin-bottom:10px}
+  .nextUp{text-align:center;color:var(--muted);font-size:14px;margin:6px 0 10px}
+  .nav{display:flex;gap:10px}
+  .nav .sec{padding:18px;font-size:18px;border-radius:16px}
+  .nav .big{flex:2;margin:0}
+  .doneWrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+  .doneWrap .em{font-size:80px}
+  .doneWrap h2{font-size:28px;margin:10px 0}
+  /* modal */
+  .modalBg{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;
+    justify-content:center;z-index:10;padding:16px}
+  .modal{background:var(--card);border-radius:20px;padding:20px;width:100%;max-width:480px}
+  .modal h3{margin:0 0 8px;font-size:20px}
+  .modal p{color:var(--muted);margin:0 0 6px;line-height:1.4}
+  .modal .formBtns{margin-top:18px}
+  .danger{background:var(--danger)!important;color:#fff!important}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<input type="file" id="filePick" accept="image/gif,image/*" style="display:none">
+<script>
+"use strict";
+/* ---------- Veri ---------- */
+const KEY = "antrenmanim_v1";
+/* İlk açılışta yüklenen hazır program (GIF'ler assets/gifs klasöründe) */
+const DEFAULT_PROGRAM = {"days": [{"id": "d1", "name": "Pazartesi (Chest, Triceps)", "exercises": [{"id": "d1e1", "name": "Chest Press Machine", "sets": "3", "reps": "8", "kg": "60", "hasGif": false, "asset": "gifs/chest-press-machine.gif"}, {"id": "d1e2", "name": "Pec Deck Fly (Butterfly)", "sets": "3", "reps": "8", "kg": "60", "hasGif": false, "asset": "gifs/pec-deck-fly-butterfly.gif"}, {"id": "d1e3", "name": "Incline Barbell Bench Press", "sets": "3", "reps": "8", "kg": "60", "hasGif": false, "asset": "gifs/incline-barbell-bench-press.gif"}, {"id": "d1e4", "name": "Kneeling Cable Crunch", "sets": "3", "reps": "8", "kg": "60", "hasGif": false, "asset": "gifs/kneeling-cable-crunch.gif"}, {"id": "d1e5", "name": "Hanging Leg Raise", "sets": "3", "reps": "8", "kg": "60", "hasGif": false, "asset": "gifs/hanging-leg-raise.gif"}, {"id": "d1e6", "name": "Low Cable Fly", "sets": "3", "reps": "8", "kg": "60", "hasGif": false, "asset": "gifs/low-cable-fly.gif"}, {"id": "d1e7", "name": "Incline Dumbbell Press", "sets": "3", "reps": "8", "kg": "60", "hasGif": false, "asset": "gifs/incline-dumbbell-press.gif"}, {"id": "d1e8", "name": "Dumbbell Fly", "sets": "3", "reps": "8", "kg": "60", "hasGif": false, "asset": "gifs/dumbbell-fly.gif"}, {"id": "d1e9", "name": "Dumbbell Seated Triceps Extension", "sets": "3", "reps": "8", "kg": "60", "hasGif": false, "asset": "gifs/dumbbell-seated-triceps-extension.gif"}, {"id": "d1e10", "name": "Decline Skull Crusher", "sets": "3", "reps": "8", "kg": "60", "hasGif": false, "asset": "gifs/decline-skull-crusher.gif"}]}, {"id": "d2", "name": "Çarşamba (Trapez, Omuz)", "exercises": [{"id": "d2e1", "name": "Reverse Pec Deck Fly", "sets": "3", "reps": "8", "kg": "60", "hasGif": false, "asset": "gifs/reverse-pec-deck-fly.gif"}, {"id": "d2e2", "name": "Lever Shoulder Press", "sets": "3", "reps": "8", "kg": "60", "hasGif": false, "asset": "gifs/lever-shoulder-press.gif"}, {"id": "d2e3", "name": "Kneeling Cable Crunch", "sets": "3", "reps": "8", "kg": "60", "hasGif": false, "asset": "gifs/kneeling-cable-crunch.gif"}, {"id": "d2e4", "name": "Hanging Leg Raise", "sets": "3", "reps": "8", "kg": "60", "hasGif": false, "asset": "gifs/hanging-leg-raise.gif"}, {"id": "d2e5", "name": "Rope Straight-Arm Pulldown", "sets": "3", "reps": "8", "kg": "60", "hasGif": false, "asset": "gifs/rope-straight-arm-pulldown.gif"}, {"id": "d2e6", "name": "Dumbbell Shrug", "sets": "3", "reps": "8", "kg": "60", "hasGif": false, "asset": "gifs/dumbbell-shrug.gif"}, {"id": "d2e7", "name": "Dumbbell Lateral Raise", "sets": "3", "reps": "8", "kg": "60", "hasGif": false, "asset": "gifs/dumbbell-lateral-raise.gif"}, {"id": "d2e8", "name": "Seated Bent-Over Lateral Raise", "sets": "3", "reps": "8", "kg": "60", "hasGif": false, "asset": "gifs/seated-bent-over-lateral-raise.gif"}, {"id": "d2e9", "name": "One-Arm Dumbbell Row", "sets": "3", "reps": "8", "kg": "60", "hasGif": false, "asset": "gifs/one-arm-dumbbell-row.gif"}]}, {"id": "d3", "name": "Cuma (Sırt, Biceps)", "exercises": [{"id": "d3e1", "name": "Pull-Up", "sets": "3", "reps": "8", "kg": "60", "hasGif": false, "asset": "gifs/pull-up.gif"}, {"id": "d3e2", "name": "Lat Pulldown", "sets": "3", "reps": "8", "kg": "60", "hasGif": false, "asset": "gifs/lat-pulldown.gif"}, {"id": "d3e3", "name": "Seated Cable Row Machine", "sets": "3", "reps": "8", "kg": "60", "hasGif": false, "asset": "gifs/seated-cable-row-machine.gif"}, {"id": "d3e4", "name": "Machine Preacher Curl", "sets": "3", "reps": "8", "kg": "60", "hasGif": false, "asset": "gifs/machine-preacher-curl.gif"}, {"id": "d3e5", "name": "Kneeling Cable Crunch", "sets": "3", "reps": "8", "kg": "60", "hasGif": false, "asset": "gifs/kneeling-cable-crunch.gif"}, {"id": "d3e6", "name": "Hanging Leg Raise", "sets": "3", "reps": "8", "kg": "60", "hasGif": false, "asset": "gifs/hanging-leg-raise.gif"}, {"id": "d3e7", "name": "Chest-Supported T-Bar Row", "sets": "3", "reps": "8", "kg": "60", "hasGif": false, "asset": "gifs/chest-supported-t-bar-row.gif"}, {"id": "d3e8", "name": "Dumbbell Wrist Curl (Palms Up)", "sets": "3", "reps": "8", "kg": "60", "hasGif": false, "asset": "gifs/dumbbell-wrist-curl-palms-up.gif"}, {"id": "d3e9", "name": "Dumbbell Concentration Curl", "sets": "3", "reps": "8", "kg": "60", "hasGif": false, "asset": "gifs/dumbbell-concentration-curl.gif"}, {"id": "d3e10", "name": "EZ Bar Curl", "sets": "3", "reps": "8", "kg": "60", "hasGif": false, "asset": "gifs/ez-bar-curl.gif"}]}]};
+let state = null;
+try { state = JSON.parse(localStorage.getItem(KEY)); } catch (e) { state = null; }
+if (!state) { state = JSON.parse(JSON.stringify(DEFAULT_PROGRAM)); try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+if (!Array.isArray(state.days)) state.days = [];
+function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { alert("Kaydedilemedi: " + e.message); } }
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+function findDay(id) { return state.days.find(d => d.id === id); }
+function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
+function show(v) { v = String(v == null ? "" : v).trim(); return v === "" ? "—" : esc(v); }
+
+/* ---------- GIF deposu (IndexedDB) ---------- */
+let dbp = null;
+function db() {
+  if (!dbp) dbp = new Promise((res, rej) => {
+    const r = indexedDB.open("antrenmanim", 1);
+    r.onupgradeneeded = () => r.result.createObjectStore("gifs");
+    r.onsuccess = () => res(r.result);
+    r.onerror = () => rej(r.error);
+  });
+  return dbp;
+}
+function tx(mode, fn) {
+  return db().then(d => new Promise((res, rej) => {
+    const t = d.transaction("gifs", mode); const s = t.objectStore("gifs");
+    const r = fn(s); t.oncomplete = () => res(r && r.result); t.onerror = () => rej(t.error);
+  }));
+}
+const gifPut = (id, blob) => tx("readwrite", s => s.put(blob, id));
+const gifGet = id => tx("readonly", s => s.get(id));
+const gifDel = id => tx("readwrite", s => s.delete(id));
+const urlCache = {};
+async function gifURL(id) {
+  if (urlCache[id]) return urlCache[id];
+  try { const b = await gifGet(id); if (!b) return null; return (urlCache[id] = URL.createObjectURL(b)); }
+  catch (e) { return null; }
+}
+function dropURL(id) { if (urlCache[id]) { URL.revokeObjectURL(urlCache[id]); delete urlCache[id]; } }
+function gifAttr(x) {
+  if (x.hasGif) return ' data-gif="' + x.id + '"';
+  if (x.asset) return ' data-src="' + esc(x.asset) + '"';
+  return "";
+}
+function fillGifs(root) {
+  root.querySelectorAll("[data-src]").forEach(el => { el.innerHTML = '<img src="' + el.dataset.src + '" alt="">'; });
+  root.querySelectorAll("[data-gif]").forEach(async el => {
+    const u = await gifURL(el.dataset.gif);
+    if (u) el.innerHTML = '<img src="' + u + '" alt="">';
+  });
+}
+
+/* ---------- Pencereler ---------- */
+let modalResolve = null;
+function closeModal(val) {
+  const m = document.querySelector(".modalBg"); if (m) m.remove();
+  if (modalResolve) { const r = modalResolve; modalResolve = null; r(val); }
+}
+function modal(html, onReady) {
+  closeModal(null);
+  return new Promise(res => {
+    modalResolve = res;
+    const bg = document.createElement("div"); bg.className = "modalBg";
+    bg.innerHTML = '<div class="modal">' + html + "</div>";
+    bg.addEventListener("click", e => { if (e.target === bg) closeModal(null); });
+    document.body.appendChild(bg);
+    if (onReady) onReady(bg);
+  });
+}
+function askConfirm(title, msg, okText) {
+  return modal('<h3>' + esc(title) + '</h3><p>' + esc(msg) + '</p><div class="formBtns">' +
+    '<button class="sec" id="mNo">Vazgeç</button><button class="big danger" id="mYes">' + esc(okText || "Sil") + '</button></div>',
+    bg => { bg.querySelector("#mNo").onclick = () => closeModal(false); bg.querySelector("#mYes").onclick = () => closeModal(true); });
+}
+function askText(title, value, placeholder) {
+  return modal('<h3>' + esc(title) + '</h3><input class="field" id="mIn" maxlength="40" placeholder="' + esc(placeholder || "") + '" value="' + esc(value || "") + '">' +
+    '<div class="formBtns"><button class="sec" id="mNo">Vazgeç</button><button class="big" id="mYes">Kaydet</button></div>',
+    bg => {
+      const inp = bg.querySelector("#mIn");
+      const ok = () => { const v = inp.value.trim(); if (v) closeModal(v); else inp.focus(); };
+      bg.querySelector("#mNo").onclick = () => closeModal(null);
+      bg.querySelector("#mYes").onclick = ok;
+      inp.addEventListener("keydown", e => { if (e.key === "Enter") ok(); });
+      setTimeout(() => inp.focus(), 50);
+    });
+}
+
+/* ---------- Yönlendirme ---------- */
+let editMode = false, editScope = null;
+let runDone = {};   // antrenman sırasında işaretlenen setler (kaydedilmez)
+function go(h) { location.hash = h; }
+function parse() { return (location.hash.replace(/^#\/?/, "") || "").split("/").filter(Boolean); }
+function scopeOf(p) {
+  if (p.length === 0) return "home";
+  if (p[0] === "day" || p[0] === "ex") return "day:" + p[1];
+  return null;
+}
+window.addEventListener("hashchange", () => { closeModal(null); render(); });
+
+function render() {
+  const p = parse();
+  const sc = scopeOf(p);
+  if (sc !== editScope) { editMode = false; editScope = sc; }
+  const app = document.getElementById("app");
+  if (p[0] === "day" && findDay(p[1])) renderDay(app, findDay(p[1]));
+  else if (p[0] === "ex" && findDay(p[1])) renderForm(app, findDay(p[1]), p[2]);
+  else if (p[0] === "run" && findDay(p[1])) renderRun(app, findDay(p[1]), parseInt(p[2], 10) || 0);
+  else if (p[0] === "done" && findDay(p[1])) renderDone(app, findDay(p[1]));
+  else renderHome(app);
+  window.scrollTo(0, 0);
+}
+function editButton() {
+  return '<button class="editBtn' + (editMode ? " on" : "") + '" id="editT">' + (editMode ? "✓ Bitti" : "✏️ Düzenle") + "</button>";
+}
+function bindEdit(app) {
+  app.querySelector("#editT").onclick = () => { editMode = !editMode; render(); };
+}
+function move(arr, i, dir) {
+  const j = i + dir; if (j < 0 || j >= arr.length) return;
+  const t = arr[i]; arr[i] = arr[j]; arr[j] = t; save(); render();
+}
+
+/* ---------- Ana ekran: Günler ---------- */
+function renderHome(app) {
+  const days = state.days;
+  let h = '<div class="screen"><header><h1>Antrenman Günlerim</h1>' + editButton() + "</header>";
+  if (editMode) h += '<div class="editNote">Düzenleme açık: gün ekleyebilir, adını değiştirebilir, sırasını değiştirebilir veya silebilirsin.</div>';
+  if (!days.length) h += '<div class="empty">Henüz gün yok.<br>Sağ üstteki <b>✏️ Düzenle</b>\'ye basıp<br><b>+ Gün Ekle</b> ile başla.</div>';
+  h += '<div class="list">';
+  days.forEach((d, i) => {
+    const n = d.exercises.length;
+    h += '<div class="item' + (editMode ? "" : " tap") + '" data-open="' + d.id + '">' +
+      '<div class="badge">' + (i + 1) + '. Gün</div>' +
+      '<div class="grow"><div class="title">' + esc(d.name) + '</div><div class="sub">' + n + " antrenman</div></div>";
+    if (editMode) h += '<div class="tools" style="flex-direction:column">' +
+      '<div style="display:flex;gap:6px"><button class="tool" data-up="' + i + '"' + (i === 0 ? " disabled" : "") + '>↑</button>' +
+      '<button class="tool" data-down="' + i + '"' + (i === days.length - 1 ? " disabled" : "") + '>↓</button></div>' +
+      '<div style="display:flex;gap:6px"><button class="tool" data-ren="' + i + '">✏️</button>' +
+      '<button class="tool del" data-del="' + i + '">🗑</button></div></div>';
+    else h += '<div style="color:var(--muted);font-size:22px">›</div>';
+    h += "</div>";
+  });
+  h += "</div>";
+  if (editMode) h += '<button class="add" id="addDay">+ Gün Ekle</button>';
+  h += "</div>";
+  app.innerHTML = h;
+  bindEdit(app);
+  app.querySelectorAll("[data-open]").forEach(el => el.onclick = e => {
+    if (editMode) return; go("/day/" + el.dataset.open);
+  });
+  if (!editMode) return;
+  app.querySelector("#addDay").onclick = async () => {
+    const name = await askText("Yeni gün", "", "Örn: Pazartesi");
+    if (name) { state.days.push({ id: uid(), name, exercises: [] }); save(); render(); }
+  };
+  app.querySelectorAll("[data-up]").forEach(b => b.onclick = e => { e.stopPropagation(); move(days, +b.dataset.up, -1); });
+  app.querySelectorAll("[data-down]").forEach(b => b.onclick = e => { e.stopPropagation(); move(days, +b.dataset.down, 1); });
+  app.querySelectorAll("[data-ren]").forEach(b => b.onclick = async e => {
+    e.stopPropagation(); const d = days[+b.dataset.ren];
+    const name = await askText("Günün adı", d.name, "Örn: Pazartesi");
+    if (name) { d.name = name; save(); render(); }
+  });
+  app.querySelectorAll("[data-del]").forEach(b => b.onclick = async e => {
+    e.stopPropagation(); const d = days[+b.dataset.del];
+    if (await askConfirm("Gün silinsin mi?", "\"" + d.name + "\" ve içindeki " + d.exercises.length + " antrenman kalıcı olarak silinecek.")) {
+      d.exercises.forEach(x => { if (x.hasGif) { gifDel(x.id); dropURL(x.id); } });
+      state.days.splice(state.days.indexOf(d), 1); save(); render();
+    }
+  });
+}
+
+/* ---------- Gün ekranı: Antrenmanlar ---------- */
+function exLine(x) {
+  return show(x.sets) + " set × " + show(x.reps) + " tekrar · " + show(x.kg) + " kg";
+}
+function renderDay(app, day) {
+  const idx = state.days.indexOf(day);
+  const ex = day.exercises;
+  let h = '<div class="screen"><header><button class="back" id="back">‹</button><h1>' + (idx + 1) + ". Gün · " + esc(day.name) + "</h1>" + editButton() + "</header>";
+  if (editMode) h += '<div class="editNote">Düzenleme açık: antrenman ekle, değiştir (GIF, set, tekrar, kg), sırala veya sil.</div>';
+  if (!ex.length) h += '<div class="empty">Bu günde henüz antrenman yok.<br><b>✏️ Düzenle</b> → <b>+ Antrenman Ekle</b></div>';
+  h += '<div class="list">';
+  ex.forEach((x, i) => {
+    h += '<div class="item' + (editMode ? "" : " tap") + '" data-i="' + i + '">' +
+      '<div class="thumb"' + gifAttr(x) + ">🏋️</div>" +
+      '<div class="grow"><div class="num">' + (i + 1) + '. Antrenman</div><div class="title">' + esc(x.name) + '</div><div class="sub">' + exLine(x) + "</div></div>";
+    if (editMode) h += '<div class="tools" style="flex-direction:column">' +
+      '<div style="display:flex;gap:6px"><button class="tool" data-up="' + i + '"' + (i === 0 ? " disabled" : "") + '>↑</button>' +
+      '<button class="tool" data-down="' + i + '"' + (i === ex.length - 1 ? " disabled" : "") + '>↓</button></div>' +
+      '<div style="display:flex;gap:6px"><button class="tool" data-ed="' + i + '">✏️</button>' +
+      '<button class="tool del" data-del="' + i + '">🗑</button></div></div>';
+    h += "</div>";
+  });
+  h += "</div>";
+  if (editMode) h += '<button class="add" id="addEx">+ Antrenman Ekle</button>';
+  else h += '<div class="spacer"></div><button class="big" id="start"' + (ex.length ? "" : " disabled") + '>▶ Bu Günün Antrenmanına Başla</button>';
+  h += "</div>";
+  app.innerHTML = h;
+  fillGifs(app);
+  bindEdit(app);
+  app.querySelector("#back").onclick = () => go("/");
+  app.querySelectorAll(".item[data-i]").forEach(el => el.onclick = () => {
+    if (editMode) return; runDone = {}; go("/run/" + day.id + "/" + el.dataset.i);
+  });
+  if (!editMode) {
+    app.querySelector("#start").onclick = () => { runDone = {}; go("/run/" + day.id + "/0"); };
+    return;
+  }
+  app.querySelector("#addEx").onclick = () => go("/ex/" + day.id + "/new");
+  app.querySelectorAll("[data-up]").forEach(b => b.onclick = e => { e.stopPropagation(); move(ex, +b.dataset.up, -1); });
+  app.querySelectorAll("[data-down]").forEach(b => b.onclick = e => { e.stopPropagation(); move(ex, +b.dataset.down, 1); });
+  app.querySelectorAll("[data-ed]").forEach(b => b.onclick = e => { e.stopPropagation(); go("/ex/" + day.id + "/" + ex[+b.dataset.ed].id); });
+  app.querySelectorAll("[data-del]").forEach(b => b.onclick = async e => {
+    e.stopPropagation(); const x = ex[+b.dataset.del];
+    if (await askConfirm("Antrenman silinsin mi?", "\"" + x.name + "\" kalıcı olarak silinecek.")) {
+      if (x.hasGif) { gifDel(x.id); dropURL(x.id); }
+      ex.splice(ex.indexOf(x), 1); save(); render();
+    }
+  });
+}
+
+/* ---------- Antrenman ekle / düzenle ---------- */
+function renderForm(app, day, exId) {
+  const isNew = exId === "new";
+  const x = isNew ? null : day.exercises.find(e => e.id === exId);
+  if (!isNew && !x) { go("/day/" + day.id); return; }
+  if (!editMode) { editMode = true; editScope = "day:" + day.id; } // forma yalnızca düzenleme modundan gelinir
+  const no = isNew ? day.exercises.length + 1 : day.exercises.indexOf(x) + 1;
+  let pending = undefined; // undefined: değişmedi, null: kaldırıldı, Blob: yeni
+  let previewURL = null;
+  app.innerHTML = '<div class="screen"><header><button class="back" id="back">‹</button><h1>' +
+    (isNew ? "Yeni antrenman" : "Antrenmanı düzenle") + '</h1></header>' +
+    '<div class="num">' + no + '. Antrenman</div>' +
+    '<label>Antrenman adı</label><input class="field" id="fName" maxlength="50" placeholder="Örn: Bench Press" value="' + esc(x ? x.name : "") + '">' +
+    '<div class="row3">' +
+    '<div><label>Set</label><input class="field" id="fSets" inputmode="numeric" maxlength="4" placeholder="4" value="' + esc(x ? x.sets : "") + '"></div>' +
+    '<div><label>Tekrar</label><input class="field" id="fReps" maxlength="8" placeholder="10" value="' + esc(x ? x.reps : "") + '"></div>' +
+    '<div><label>Kg</label><input class="field" id="fKg" inputmode="decimal" maxlength="7" placeholder="60" value="' + esc(x ? x.kg : "") + '"></div>' +
+    '</div>' +
+    '<label>GIF</label><div class="gifbox" id="gifBox"' + (x ? gifAttr(x) : "") + '>GIF eklenmedi</div>' +
+    '<div class="btnrow"><button class="sec" id="pick">🖼 GIF Seç</button><button class="sec red" id="rmGif">GIF\'i Kaldır</button></div>' +
+    '<div class="formBtns"><button class="sec" id="cancel">Vazgeç</button><button class="big" id="saveB">Kaydet</button></div>' +
+    "</div>";
+  fillGifs(app);
+  const fp = document.getElementById("filePick");
+  const box = app.querySelector("#gifBox");
+  app.querySelector("#pick").onclick = () => { fp.value = ""; fp.click(); };
+  fp.onchange = () => {
+    const f = fp.files && fp.files[0]; if (!f) return;
+    pending = f;
+    if (previewURL) URL.revokeObjectURL(previewURL);
+    previewURL = URL.createObjectURL(f);
+    box.innerHTML = '<img src="' + previewURL + '" alt="">';
+  };
+  app.querySelector("#rmGif").onclick = () => { pending = null; box.innerHTML = "GIF eklenmedi"; };
+  const leave = () => { if (history.length > 1) history.back(); else go("/day/" + day.id); };
+  app.querySelector("#back").onclick = leave;
+  app.querySelector("#cancel").onclick = leave;
+  app.querySelector("#saveB").onclick = async () => {
+    const name = app.querySelector("#fName").value.trim();
+    if (!name) { app.querySelector("#fName").focus(); app.querySelector("#fName").style.borderColor = "var(--danger)"; return; }
+    const btn = app.querySelector("#saveB"); btn.disabled = true; btn.textContent = "Kaydediliyor…";
+    const item = x || { id: uid(), hasGif: false };
+    item.name = name;
+    item.sets = app.querySelector("#fSets").value.trim();
+    item.reps = app.querySelector("#fReps").value.trim();
+    item.kg = app.querySelector("#fKg").value.trim().replace(",", ".");
+    try {
+      if (pending instanceof Blob) { await gifPut(item.id, pending); dropURL(item.id); item.hasGif = true; }
+      else if (pending === null) {
+        if (item.hasGif) { await gifDel(item.id); dropURL(item.id); item.hasGif = false; }
+        item.asset = null;
+      }
+    } catch (e) { alert("GIF kaydedilemedi: " + (e && e.message)); }
+    if (isNew) day.exercises.push(item);
+    save();
+    leave();
+  };
+}
+
+/* ---------- Antrenman modu ---------- */
+function renderRun(app, day, i) {
+  const ex = day.exercises;
+  if (!ex.length) { go("/day/" + day.id); return; }
+  if (i < 0) i = 0; if (i >= ex.length) i = ex.length - 1;
+  const x = ex[i];
+  const total = ex.length;
+  const setN = Math.min(parseInt(x.sets, 10) || 0, 20);
+  const done = runDone[x.id] || (runDone[x.id] = []);
+  let dots = "";
+  for (let s = 0; s < setN; s++) dots += '<button class="dot' + (done[s] ? " done" : "") + '" data-s="' + s + '">' + (s + 1) + "</button>";
+  const last = i === total - 1;
+  app.innerHTML = '<div class="screen run">' +
+    '<div class="runTop"><button class="back" id="exit">✕</button><div class="progress"><i style="width:' + ((i + 1) / total * 100) + '%"></i></div><div class="count">' + (i + 1) + " / " + total + "</div></div>" +
+    '<div class="runNum">' + (i + 1) + ". Antrenman</div>" +
+    '<div class="runName">' + esc(x.name) + "</div>" +
+    '<div class="runGif"' + gifAttr(x) + ">" + (gifAttr(x) ? "" : "GIF yok") + "</div>" +
+    '<div class="stats">' +
+    '<div class="stat"><b>' + show(x.sets) + '</b><span>SET</span></div>' +
+    '<div class="stat"><b>' + show(x.reps) + '</b><span>TEKRAR</span></div>' +
+    '<div class="stat"><b>' + show(x.kg) + '</b><span>KG</span></div></div>' +
+    (setN ? '<div class="sets">' + dots + '</div><div class="hint">Biten seti işaretlemek için dokun</div>' : "") +
+    '<div class="nextUp">' + (last ? "Son antrenman 💪" : "Sıradaki: <b>" + esc(ex[i + 1].name) + "</b>") + "</div>" +
+    '<div class="nav"><button class="sec" id="prev"' + (i === 0 ? " disabled style=\"opacity:.35\"" : "") + '>◀ Önceki</button>' +
+    '<button class="big" id="next">' + (last ? "Bitir ✓" : "Sonraki ▶") + "</button></div>" +
+    "</div>";
+  fillGifs(app);
+  app.querySelector("#exit").onclick = () => history.back();
+  app.querySelector("#prev").onclick = () => { if (i > 0) location.replace("#/run/" + day.id + "/" + (i - 1)); };
+  app.querySelector("#next").onclick = () => location.replace(last ? "#/done/" + day.id : "#/run/" + day.id + "/" + (i + 1));
+  app.querySelectorAll(".dot").forEach(b => b.onclick = () => {
+    const s = +b.dataset.s; done[s] = !done[s]; b.classList.toggle("done", !!done[s]);
+  });
+}
+function renderDone(app, day) {
+  app.innerHTML = '<div class="screen"><div class="doneWrap"><div class="em">🏆</div><h2>Tebrikler!</h2>' +
+    '<p style="color:var(--muted)">' + esc(day.name) + " antrenmanı tamamlandı.</p></div>" +
+    '<button class="big" id="ok">Tamam</button></div>';
+  app.querySelector("#ok").onclick = () => history.back();
+}
+
+render();
+</script>
+</body>
+</html>
